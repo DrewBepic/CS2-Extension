@@ -1,0 +1,33 @@
+{
+	"name": "CS2 Extension",
+	"description": "Base Level Extension",
+	"version": "1.0",
+	"manifest_version": 3,
+	"host_permissions": ["<all_urls>", "http://localhost:3000/*"],
+	"permissions": ["storage"],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://lis-skins.com/market/csgo/*","https://lis-skins.com/market/cs2/*"],
+			"js": ["content/LisMarketPage.js"]
+		},
+		{
+			"matches": ["https://lis-skins.com/market/csgo/*","https://lis-skins.com/market/cs2/*"],
+			"js": ["content/LisSkinsPage.js"]
+		},
+		{
+			"matches": ["https://lis-skins.com/cs2/*"],
+			"js": ["content/LisSellPage.js"]
+		},
+		{
+			"matches": ["https://csfloat.com/*"],
+			"js": ["content/CSFloatStallPage.js"]
+		}
+	],
+	"action": {
+		"default_popup": "popup.html",
+		"default_icon": "extension_image.png"
+	}
+}
