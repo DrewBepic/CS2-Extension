@@ -3,3 +3,5 @@ ExtensionScriptTODOs.md
 GoogleSheetsTODOs.md
 package-lock.json
 .env
+.vscode
+.prettierrc
