@@ -24,7 +24,7 @@
 		{
 			"matches": ["https://csfloat.com/*"],
 			"exclude_matches": ["https://csfloat.com/item/*"],
-			"js": ["content/CSFloatStallPage.js"]
+			"js": ["content/CSFloatBoxes.js"]
 		},
 		{
 			"matches": ["https://csfloat.com/search*"],
