@@ -10,11 +10,11 @@
 	},
 	"content_scripts": [
 		{
-			"matches": ["https://lis-skins.com/market/csgo/*","https://lis-skins.com/market/cs2/*"],
+			"matches": ["https://lis-skins.com/market/csgo/*", "https://lis-skins.com/market/cs2/*"],
 			"js": ["content/LisMarketPage.js"]
 		},
 		{
-			"matches": ["https://lis-skins.com/market/csgo/*","https://lis-skins.com/market/cs2/*"],
+			"matches": ["https://lis-skins.com/market/csgo/*", "https://lis-skins.com/market/cs2/*"],
 			"js": ["content/LisSkinsPage.js"]
 		},
 		{
@@ -23,7 +23,12 @@
 		},
 		{
 			"matches": ["https://csfloat.com/*"],
+			"exclude_matches": ["https://csfloat.com/item/*"],
 			"js": ["content/CSFloatStallPage.js"]
+		},
+		{
+			"matches": ["https://csfloat.com/search*"],
+			"js": ["content/CSFloat50To500.js"]
 		}
 	],
 	"action": {

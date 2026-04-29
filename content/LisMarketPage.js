@@ -104,7 +104,6 @@ function scanPage() {
 						minFloat = 0.44;
 					}
 
-					// console.log(skin.innerText)
 					let category;
 					if (statrak) {
 						category = 2;

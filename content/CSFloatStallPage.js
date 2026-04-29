@@ -1,4 +1,4 @@
-let lastUrl = location.href;
+let lastUrlStall  = location.href;
 
 // Cache the skins list so we only fetch once
 let skinsCache = null;
@@ -32,11 +32,6 @@ async function scanPage() {
 			float = parseFloat(float);
 			let type = skin.querySelector(".header .subtext span")?.textContent.trim();
 			let skinWear = skin.querySelector(".header .subtext")?.textContent.trim();
-
-			console.log("Name:", name);
-			console.log("Float:", float);
-			console.log("Type:", type);
-			console.log("Skin Wear:", skinWear);
 
 			if (float) {
 				let maxFloat = 1;
@@ -85,9 +80,6 @@ async function scanPage() {
 
 				const paintIndex = await getPaintIndex(name); // ← fetch before building skinData
 				const weaponId = await getWeaponId(name); // ← fetch before building skinData
-
-				console.log("Weapon ID:", weaponId);
-				console.log("Paint Index:", paintIndex);
 				const cardElement = skin;
 				if (cardElement.querySelector(".csfloat-link-btn")) continue;
 				const csfloatBtn = document.createElement("a");
@@ -137,8 +129,8 @@ setTimeout(() => {
 }, 500);
 
 setInterval(() => {
-	if (location.href !== lastUrl) {
-		lastUrl = location.href;
+	if (location.href !== lastUrlStall ) {
+		lastUrlStall  = location.href;
 		if (location.href.includes("__cf_chl_tk")) return; // skip CF challenge
 		console.log("Page changed, rescanning...");
 		setTimeout(scanPage, 3000);

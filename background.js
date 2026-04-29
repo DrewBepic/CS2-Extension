@@ -20,4 +20,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     return true;
   }
+
+  if (msg.type === "GET_LIS_PRICES") {
+    fetch(`http://localhost:3000/get-lis-prices?apiKey=${msg.apiKey}&skinName=${msg.skinName}`)
+      .then((res) => res.json())
+      .then((result) => sendResponse(result))
+      .catch((err) => sendResponse({ success: false, message: err.message }));
+
+    return true;
+  }
 });

@@ -22,7 +22,6 @@ async function percentComparer() {
 		csfloatData.forEach((item) => {
 			csfloatDict[item["item"]["market_hash_name"]] = item["price"] / 100;
 		});
-		// console.log(csfloatDict);
 
 		const lists = document.querySelectorAll(".inventory");
 
@@ -39,9 +38,7 @@ async function percentComparer() {
 
 			if (csfloatPrice) {
 				const lisPrice = Number(priceElement.textContent.trim().replace("$", ""));
-				// console.log(csfloatPrice, lisPrice);
 				const percent = lisPrice / csfloatPrice;
-				// console.log(`${skinName}: ${percent * 100}% of CSFloat price`);
 				cardElement.style.position = "relative";
 				let label = cardElement.querySelector(".percent-label");
 				if (!label) {

@@ -6,10 +6,8 @@ function inputPriceOnSkinPage() {
 	lists.forEach((list) => {
 		const priceElements = list.querySelectorAll(".price");
 		let floats = list.querySelectorAll(".float");
-		// if (floats.length === 0) console.log("Skin doesn't have floats");
 
 		priceElements.forEach(async (priceElement, index) => {
-			// const price = priceElements[index]?.innerText;
 			const cardElement = priceElement.closest(".item.row.market_item");
 			const element = cardElement.querySelector(".price");
 			let goodBuyPrice = (1.125 * Number(priceElement.innerText.replace(/[^0-9.]/g, ""))).toFixed(2);
