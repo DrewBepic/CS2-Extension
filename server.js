@@ -80,6 +80,34 @@ app.get("/get-lis-prices", async (req, res) => {
 	}
 });
 
+app.patch("/set-skin-description", async (req, res) => {
+	const { id, description } = req.body;
+	const csfloatApiKey = req.query.apiKey;
+	if (!csfloatApiKey) {
+		return res.status(400).json({ success: false, message: "API key is required." });
+	}
+	try {
+		let url = `https://csfloat.com/api/v1/listings/${id}`;
+		const response = await fetch(url, {
+			method: "PATCH",
+			headers: {
+				Authorization: csfloatApiKey,
+				"Content-Type": "application/json",
+				"User-Agent": "Mozilla/5.0",
+			},
+			body: JSON.stringify({ description: description }),
+		});
+		const data = await response.json();
+		if (!response.ok) {
+			return res.status(response.status).json({ success: false, message: data });
+		}
+		res.json({ success: true, message: "Description updated successfully." });
+	} catch (err) {
+		console.log("Error updating skin description:", err);
+		res.status(500).json({ success: false, message: err.message });
+	}
+});
+
 app.listen(3000, () => {
 	console.log("Server running at http://localhost:3000");
 });

@@ -29,6 +29,10 @@
 		{
 			"matches": ["https://csfloat.com/search*"],
 			"js": ["content/CSFloat50To500.js"]
+		},
+		{
+			"matches": ["https://csfloat.com/stall/me*"],
+			"js": ["content/CSFloatStallPage.js"]
 		}
 	],
 	"action": {
