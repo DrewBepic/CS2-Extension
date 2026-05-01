@@ -64,7 +64,12 @@ app.get("/get-lis-prices", async (req, res) => {
 		if (!lisSkinsApiKey) {
 			return res.status(400).json({ success: false, message: "API key is required." });
 		}
-		let url = `https://api.lis-skins.com/v1/market/search?game=csgo&sort_by=lowest_price&names[]=${req.query.skinName}`;
+		const skinNames = req.query["names[]"];
+		const namesArray = Array.isArray(skinNames) ? skinNames : [skinNames];
+		let url = `https://api.lis-skins.com/v1/market/search?game=csgo&sort_by=lowest_price`;
+		for (const name of namesArray) {
+			url += `&names[]=${encodeURIComponent(name)}`;
+		}
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {

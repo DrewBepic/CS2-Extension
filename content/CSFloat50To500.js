@@ -3,86 +3,128 @@ let lastUrl50to500 = location.href;
 let lisPrices = {};
 let currentTime = new Date();
 const TEN_MINUTES = 10 * 60 * 1000;
+let isRunning = false;
 
+function setLook(cardPrice, lowestPrice, card) {
+	cardPrice = parseFloat(cardPrice.replace(/[^0-9.]/g, ""));
+
+	let color;
+	if (cardPrice <= lowestPrice * 0.9) {
+		color = "rgba(0, 255, 0, 0.2)";
+	} else {
+		color = "rgba(255, 0, 0, 0.2)";
+	}
+
+	const header = card.querySelector(".header");
+	const footer = card.querySelector(".footer");
+	const outerActions = card.querySelector(".outer-actions");
+
+	if (header) header.style.backgroundColor = color;
+	if (footer) footer.style.backgroundColor = color;
+	if (outerActions) outerActions.style.backgroundColor = "transparent";
+	card.style.backgroundColor = "";
+}
+
+
+//Doesn't work with Doppler Phases cause it doesn't account for them but meh
 async function FityToFaHuned() {
-	if (new Date() - currentTime > TEN_MINUTES) {
-		lisPrices = {};
-		currentTime = new Date();
-		console.log("Cache reset after 10 minutes");
-	}
-	const { lis_skins_api_key } = await chrome.storage.local.get("lis_skins_api_key");
-	if (!lis_skins_api_key) {
-		console.warn("LIS Skins API key not found. Please set it in the extension options.");
-		return;
-	}
-	const contentWrapper = document.querySelector(".content-wrapper");
-	if (!contentWrapper) return;
-
-	const cards = contentWrapper.querySelectorAll("item-card");
-
-	for (const card of cards) {
-		if (card.querySelector(".header")?.style.backgroundColor) continue;
-		const name = card.querySelector(".item-name")?.textContent?.trim();
-		const subtext = card.querySelector(".subtext")?.textContent?.trim();
-		const price = card.querySelector(".price")?.textContent?.trim();
-		const floatVal = card.querySelector(".wear")?.textContent?.trim();
-
-		let finalName = name;
-		if (subtext.includes("Factory New")) {
-			finalName = finalName + " (Factory New)";
-		} else if (subtext.includes("Minimal Wear")) {
-			finalName = finalName + " (Minimal Wear)";
-		} else if (subtext.includes("Field-Tested")) {
-			finalName = finalName + " (Field-Tested)";
-		} else if (subtext.includes("Well-Worn")) {
-			finalName = finalName + " (Well-Worn)";
-		} else if (subtext.includes("Battle-Scarred")) {
-			finalName = finalName + " (Battle-Scarred)";
+	if (isRunning) return;
+	isRunning = true;
+	try {
+		if (new Date() - currentTime > TEN_MINUTES) {
+			lisPrices = {};
+			currentTime = new Date();
+			console.log("Cache reset after 10 minutes");
 		}
-		if (subtext.includes("StatTrak")) {
-			finalName = "StatTrak™ " + finalName;
-		} else if (subtext.includes("Souvenir")) {
-			finalName = "Souvenir " + finalName;
+		const { lis_skins_api_key } = await chrome.storage.local.get("lis_skins_api_key");
+		if (!lis_skins_api_key) {
+			console.warn("LIS Skins API key not found. Please set it in the extension options.");
+			return;
 		}
+		const contentWrapper = document.querySelector(".content-wrapper");
+		if (!contentWrapper) return;
 
-		let lowestPrice = 0;
-		let tester = 0;
-		if (lisPrices[finalName]) {
-			lowestPrice = lisPrices[finalName];
-			tester = 1;
-		} else {
-			const result = await chrome.runtime.sendMessage({
-				type: "GET_LIS_PRICES",
-				apiKey: lis_skins_api_key,
-				skinName: finalName,
-			});
-			try{
-				lowestPrice = result.data.data[0]?.price || 0;
-			} catch (error) {
-				console.log(result);
-				lowestPrice = 0;
+		const cards = contentWrapper.querySelectorAll("item-card");
+		let temp = {};
+		for (const card of cards) {
+			if (card.querySelector(".header")?.style.backgroundColor) continue;
+			const name = card.querySelector(".item-name")?.textContent?.trim();
+			const subtext = card.querySelector(".subtext")?.textContent?.trim();
+			const price = card.querySelector(".price")?.textContent?.trim();
+			const floatVal = card.querySelector(".wear")?.textContent?.trim();
+
+			let finalName = name;
+			if (subtext.includes("Factory New")) {
+				finalName = finalName + " (Factory New)";
+			} else if (subtext.includes("Minimal Wear")) {
+				finalName = finalName + " (Minimal Wear)";
+			} else if (subtext.includes("Field-Tested")) {
+				finalName = finalName + " (Field-Tested)";
+			} else if (subtext.includes("Well-Worn")) {
+				finalName = finalName + " (Well-Worn)";
+			} else if (subtext.includes("Battle-Scarred")) {
+				finalName = finalName + " (Battle-Scarred)";
 			}
-			lisPrices[finalName] = lowestPrice;
-			tester = 2;
+			if (subtext.includes("StatTrak")) {
+				finalName = "StatTrak™ " + finalName;
+			} else if (subtext.includes("Souvenir")) {
+				finalName = "Souvenir " + finalName;
+			}
+
+			let lowestPrice = 0;
+			if (lisPrices[finalName]) {
+				lowestPrice = lisPrices[finalName];
+				setLook(price, lowestPrice, card);
+				continue;
+			}
+
+			if (temp[finalName]) {
+				temp[finalName].push(card);
+			} else {
+				temp[finalName] = [card];
+			}
+
+			if (Object.keys(temp).length == 6) {
+				const result = await chrome.runtime.sendMessage({
+					type: "GET_LIS_PRICES",
+					apiKey: lis_skins_api_key,
+					skinNames: Object.keys(temp),
+				});
+				let skinNames = Object.keys(temp);
+				let temptemp = {};
+				for (let skin of skinNames) {
+					let found = false;
+					for (let item of result.data.data) {
+						if (item.name === skin) {
+							let tempLowestPrice = item.price || 0;
+							lisPrices[skin] = tempLowestPrice;
+							for (let card of temp[skin]) {
+								setLook(card.querySelector(".price")?.textContent?.trim(), tempLowestPrice, card);
+							}
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						temptemp[skin] = temp[skin];
+					}
+				}
+				if (Object.keys(temptemp).length > 0 && result.data?.data.length < 200) {
+					console.log(temptemp)
+					for (let skin of Object.keys(temptemp)) {
+						for (let cardo of temptemp[skin]) {
+							setLook(cardo.querySelector(".price")?.textContent?.trim(), -1, cardo);
+						}
+						lisPrices[skin] = -1;
+					}
+					temp = {};
+				} else {
+					temp = temptemp;
+				}
+			}
 		}
-		console.log(`Lowest price for ${finalName}: ${lowestPrice} gotten from ${tester}`);
-		const cardPrice = parseFloat(price.replace(/[^0-9.]/g, ""));
-
-		let color;
-		if (cardPrice <= lowestPrice * 0.9) {
-			color = "rgba(0, 255, 0, 0.2)";
-		} else {
-			color = "rgba(255, 0, 0, 0.2)";
-		}
-
-		const header = card.querySelector(".header");
-		const footer = card.querySelector(".footer");
-		const outerActions = card.querySelector(".outer-actions");
-
-		if (header) header.style.backgroundColor = color;
-		if (footer) footer.style.backgroundColor = color;
-		if (outerActions) outerActions.style.backgroundColor = "transparent";
-		card.style.backgroundColor = "";
+	} finally {
+		isRunning = false;
 	}
 }
 
@@ -100,28 +142,28 @@ function shouldRun() {
 	);
 }
 function observeAndRun() {
-    let scanTimeout = null;
-    const observer = new MutationObserver(() => {
-        clearTimeout(scanTimeout);
-        scanTimeout = setTimeout(FityToFaHuned, 300);
-    });
+	let scanTimeout = null;
+	const observer = new MutationObserver(() => {
+		clearTimeout(scanTimeout);
+		scanTimeout = setTimeout(FityToFaHuned, 300);
+	});
 
-    const contentWrapper = document.querySelector(".content-wrapper");
-    if (contentWrapper) {
-        observer.observe(contentWrapper, {
-            childList: true,
-            subtree: true,
-        });
-    }
+	const contentWrapper = document.querySelector(".content-wrapper");
+	if (contentWrapper) {
+		observer.observe(contentWrapper, {
+			childList: true,
+			subtree: true,
+		});
+	}
 }
 
 setTimeout(() => {
-    if (shouldRun()) {
-        FityToFaHuned();
-        observeAndRun();
-    } else {
-        console.log("Initial load skipped:", location.href);
-    }
+	if (shouldRun()) {
+		FityToFaHuned();
+		observeAndRun();
+	} else {
+		console.log("Initial load skipped:", location.href);
+	}
 }, 500);
 
 setInterval(() => {

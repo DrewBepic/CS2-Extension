@@ -22,7 +22,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	}
 
 	if (msg.type === "GET_LIS_PRICES") {
-		fetch(`http://localhost:3000/get-lis-prices?apiKey=${msg.apiKey}&skinName=${msg.skinName}`)
+		const namesQuery = msg.skinNames.map((name) => `names[]=${encodeURIComponent(name)}`).join("&");
+		fetch(`http://localhost:3000/get-lis-prices?apiKey=${msg.apiKey}&${namesQuery}`)
 			.then((res) => res.json())
 			.then((result) => sendResponse(result))
 			.catch((err) => sendResponse({ success: false, message: err.message }));
