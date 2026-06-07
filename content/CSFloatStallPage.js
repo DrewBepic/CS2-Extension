@@ -37,6 +37,4 @@ async function setDescription() {
 	}
 }
 
-setTimeout(() => {
-	setDescription();
-}, 3000);
+setDescription();

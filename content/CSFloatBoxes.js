@@ -61,11 +61,11 @@ async function scanPage() {
 						maxFloat = 0.2;
 					}
 				} else if (skinWear.includes("Well-Worn")) {
-					maxFloat = 0.44;
+					maxFloat = 0.45;
 					minFloat = 0.38;
 				} else if (skinWear.includes("Battle-Scarred")) {
 					maxFloat = 1;
-					minFloat = 0.44;
+					minFloat = 0.45;
 				}
 
 				//Category 1: Normal, Category 2: StatTrak, Category 3: Souvenir
